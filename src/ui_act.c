@@ -95,6 +95,12 @@ BarUiActCallback(BarUiActHelp) {
 	}
 }
 
+BarUiActCallback(BarUiActPrint) {
+	assert (selStation != NULL);
+	assert (selSong != NULL);
+	BarUiMsg(&app->settings, MSG_NONE, "%s - %s\n", selSong->title, selSong->artist);
+}
+
 /*	add more music to current station
  */
 BarUiActCallback(BarUiActAddMusic) {
