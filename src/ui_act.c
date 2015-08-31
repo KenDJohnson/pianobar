@@ -30,10 +30,15 @@ THE SOFTWARE.
 #include <pthread.h>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <stdlib.h>
 
 #include "ui.h"
 #include "ui_readline.h"
 #include "ui_dispatch.h"
+#include "settings.h"
 
 /*	standard eventcmd call
  */
@@ -98,7 +103,21 @@ BarUiActCallback(BarUiActHelp) {
 BarUiActCallback(BarUiActPrint) {
 	assert (selStation != NULL);
 	assert (selSong != NULL);
-	BarUiMsg(&app->settings, MSG_NONE, "%s - %s\n", selSong->title, selSong->artist);
+	const char *npname = "/.config/pianobar/now_playing";
+	const char *home = getenv("HOME");
+	if(!strlen(home)) return;
+	char *nowplaying = (char *) malloc(strlen(home) + strlen(npname) + 1);
+	memset(nowplaying, 0, sizeof(nowplaying));
+	strcpy(nowplaying, home);
+	strncat(nowplaying, npname, strlen(home) + strlen(npname));
+	FILE *np_file = fopen(nowplaying, "w");
+	if(np_file == 0) return;
+	fprintf(np_file, "%s - %s\n", selSong->title, selSong->artist);
+	/*fwrite(selSong->title, strlen(selSong->title), 1, np_file);
+	fwrite(" - ", 3, 1, np_file);
+	fwrite(selSong->artist, strlen(selSong->artist), 1, np_file);*/
+	free(nowplaying);
+	fclose(np_file);
 }
 
 /*	add more music to current station
